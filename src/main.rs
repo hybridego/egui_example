@@ -1,32 +1,24 @@
-use eframe::egui; // (1)
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")] // hide console window on Windows in release
 
-#[derive(Default)] // (2)
-struct WhiteFCApp {}
+// Include the shared app implementation into the binary crate as well.
+include!("shared.rs");
 
-impl eframe::App for WhiteFCApp {
-    // (3)
-    fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
-        // (4)
-        egui::CentralPanel::default().show(ctx, |ui| {
-            ui.heading("Hello egui"); // (5)
-        });
-    }
-}
-
-fn run_app() -> Result<(), eframe::Error> {
-    let option = eframe::NativeOptions::default(); // (6)
+// when compiling to native
+#[cfg(not(target_arch = "wasm32"))]
+fn main() -> Result<(), eframe::Error> {
+    let option = eframe::NativeOptions::default();
     eframe::run_native(
-        // (7)
-        "WhiteFC App", // title
-        option,        // NativeOptions
+        "WhiteFC App",
+        option,
         Box::new(|cc| {
-            // Force light visuals (white background)
-            cc.egui_ctx.set_visuals(egui::Visuals::light());
-            Ok(Box::new(WhiteFCApp::default()))
-        }), // (8)
+            cc.egui_ctx.set_visuals(eframe::egui::Visuals::light());
+            Box::new(WhiteFCApp::default())
+        }),
     )
 }
 
-fn main() -> Result<(), eframe::Error> {
-    run_app()
-}
+// When building for wasm this binary target still needs a `main` symbol.
+// Provide a no-op main for the wasm target so cargo can build the binary
+// when running a wasm-targeted build (trunk invokes cargo for wasm).
+#[cfg(target_arch = "wasm32")]
+fn main() {}

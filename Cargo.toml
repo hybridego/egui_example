@@ -4,4 +4,26 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-eframe = "0.33.0"
+eframe = { version = "0.27.2", default-features = false, features = [
+    "accesskit",     # Make egui comptaible with screen readers
+    "default_fonts", # Embed the default egui fonts
+    "glow",          # Use the glow rendering backend. Alternative: "wgpu"
+] }
+
+# native:
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+tracing-subscriber = "0.3"
+
+# web:
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+console_error_panic_hook = "0.1.7"
+tracing-wasm = "0.2"
+wasm-bindgen-futures = "0.4"
+wasm-bindgen = "0.2"
+
+[lib]
+crate-type = ["cdylib"]
+
+[[bin]]
+name = "egui_native"
+path = "src/main.rs"
